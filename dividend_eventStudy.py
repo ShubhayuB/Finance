@@ -1,39 +1,50 @@
-pip install yahoo_fin yfinance pandas openpyxl
+pip install yfinance pandas openpyxl requests beautifulsoup4
 
+import requests
+from bs4 import BeautifulSoup
 import pandas as pd
-from yahoo_fin import stock_info as si
 import yfinance as yf
-from datetime import datetime, timedelta
 
-# Function to fetch the last 5 dividend dates
-def get_last_5_dividend_dates(stock_symbol):
-    dividends = si.get_dividends(stock_symbol)
-    last_5_dividends = dividends.tail(5)
-    return last_5_dividends.index
+# Define the URL
+url = "https://www.moneycontrol.com/company-facts/siemens/dividends/S"
 
-# Function to fetch closing prices 15 days before and after the dividend dates
-def get_closing_prices(stock_symbol, dividend_dates):
-    data = []
-    for date in dividend_dates:
-        start_date = (date - timedelta(days=15)).strftime('%Y-%m-%d')
-        end_date = (date + timedelta(days=15)).strftime('%Y-%m-%d')
-        stock_data = yf.download(stock_symbol, start=start_date, end=end_date)
-        for idx, row in stock_data.iterrows():
-            data.append([stock_symbol, date.strftime('%Y-%m-%d'), idx.strftime('%Y-%m-%d'), row['Close']])
-    return data
+# Fetch the web page
+response = requests.get(url)
+soup = BeautifulSoup(response.content, "html.parser")
 
-def main():
-    stock_symbol = 'SIEMENS.NS'  # Change this to the stock symbol you want to analyze
-    dividend_dates = get_last_5_dividend_dates(stock_symbol)
-    closing_prices_data = get_closing_prices(stock_symbol, dividend_dates)
+# Extract the last 5 dividend announcement dates
+dividend_table = soup.find("table", {"class": "mctable1"})
+rows = dividend_table.find_all("tr")[1:6]  # Get the last 5 rows
+dividend_dates = [row.find_all("td")[0].text.strip() for row in rows]
+
+# Convert dividend_dates to datetime format
+dividend_dates = pd.to_datetime(dividend_dates, format="%d-%m-%Y")
+
+print(dividend_dates)
+
+# Define the stock ticker
+ticker = "SIEMENS.NS"
+
+# Initialize an empty DataFrame to store the data
+all_data = pd.DataFrame()
+
+for date in dividend_dates:
+    start_date = (date - pd.DateOffset(days=15)).strftime("%Y-%m-%d")
+    end_date = (date + pd.DateOffset(days=15)).strftime("%Y-%m-%d")
     
-    # Create a DataFrame
-    df = pd.DataFrame(closing_prices_data, columns=['Stock Symbol', 'Dividend Date', 'Date', 'Closing Price'])
+    # Fetch the historical data
+    data = yf.download(ticker, start=start_date, end=end_date)
     
-    # Write DataFrame to Excel
-    output_file = 'dividend_stock_prices_siemens.xlsx'
-    df.to_excel(output_file, index=False)
-    print(f'Data has been written to {output_file}')
+    # Add the announcement date to the DataFrame
+    data['Announcement Date'] = date
+    
+    # Append to the main DataFrame
+    all_data = all_data.append(data)
 
-if __name__ == "__main__":
-    main()
+# Reset index
+all_data.reset_index(inplace=True)
+
+print(all_data)
+
+# Save the DataFrame to an Excel file
+all_data.to_excel("Siemens_Dividend_Data.xlsx", index=False)
