@@ -16,6 +16,14 @@ nifty_data = yf.download(nifty_ticker, start=start_date, end=end_date)
 siemens_data['Returns'] = siemens_data['Adj Close'].pct_change()
 nifty_data['Returns'] = nifty_data['Adj Close'].pct_change()
 
+# If you want to calculate weekly returns, just replace above code with this and consecutive code accordingly
+"""siemens_data['Weekly Adj Close'] = siemens_data['Adj Close'].resample('W-FRI').ffill()
+nifty_data['Weekly Adj Close'] = nifty_data['Adj Close'].resample('W-FRI').ffill()
+
+siemens_data['Weekly Returns'] = siemens_data['Weekly Adj Close'].pct_change()
+nifty_data['Weekly Returns'] = nifty_data['Weekly Adj Close'].pct_change()"""
+
+
 # Data cleaning and aligning
 siemens_returns = siemens_data['Returns'].dropna()
 nifty_returns = nifty_data['Returns'].dropna()
