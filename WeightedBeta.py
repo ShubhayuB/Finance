@@ -28,7 +28,7 @@ returns_data['Excess_Stock'] = returns_data['Stock'] - returns_data['RiskFree']
 returns_data['Excess_Market'] = returns_data['Market'] - returns_data['RiskFree']
 
 # Step 3: Apply Normalized Weights
-lambda_value = 0.  # Example lambda value
+lambda_value = 0.97  # Example lambda value
 t_values = np.arange(len(returns_data))  # Time values
 
 # Calculate weights and normalized weights
