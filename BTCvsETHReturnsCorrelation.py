@@ -40,8 +40,8 @@ def plot_btc_vs_eth_returns(btc_returns, eth_returns):
     plt.show()
 
 # Define the date range
-start_date = '2022-01-01'
-end_date = '2023-01-01'
+start_date = '2023-01-01'
+end_date = '2024-01-01'
 
 # Fetch BTC and ETH price data using yfinance
 btc_data = get_crypto_data('BTC-USD', start_date, end_date)
