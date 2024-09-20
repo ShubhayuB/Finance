@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Load your dataset
-file_path = 'C:/Users/shubh/Documents/Bits Pilani/Sperax/USDC-ETH Pool Volume(1 Month).xlsx' 
+file_path = 'USDC-ETH Pool Volume(1 Month).xlsx' 
 df = pd.read_excel(file_path, sheet_name='Sheet1')
 
 # Convert the 'Date' column to datetime
